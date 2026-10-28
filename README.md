@@ -1,3 +1,4 @@
+
 # CarbonTrack AI | Hack Fest 2026 — Green Tech & Sustainability
 
 **CarbonTrack AI** is a digital carbon accounting and decarbonization intelligence platform designed for individuals, college campuses, and organizations to quantify greenhouse gas (GHG) emissions, understand primary emission hotspots, track reduction targets, and adopt practical sustainable practices.
@@ -200,3 +201,7 @@ To prevent combining mismatched daily, weekly, and monthly rates:
 1. **Scope 3 Supply Chain**: Current version focuses on Scopes 1 & 2 (direct fuels, electricity, and local commutes). Full Scope 3 upstream purchased goods accounting is planned for post-hackathon release.
 2. **Utility Meter IoT Integration**: Current calculations rely on user-entered bill and odometer figures; direct smart-meter API integrations (e.g. Green Button, Smart Meter Texas) represent the next phase.
 3. **Pluggable Generative AI**: The recommendations engine is transparently rule-based today using verified engineering formulas. The code is modularized so an OpenAI/Gemini API key can be inserted into `backend/services/recommendations.py` for dynamic natural-language advisory.
+
+# codetitans-t3-01
+Official HackFest 2026 repository for team CodeTitans (T3-01).
+
