@@ -8,7 +8,11 @@ const AUTH_TOKEN_KEY = 'carbontrack_token';
 
 // Normalize configured URL or fallback to IPv4 127.0.0.1:8081
 const envUrl = import.meta.env.VITE_API_URL;
-let resolvedBaseUrl = envUrl ? envUrl.replace('localhost', '127.0.0.1') : 'http://127.0.0.1:8081';
+
+// In production or on Vercel, default to the live cloud backend or relative path
+let resolvedBaseUrl = envUrl
+  ? envUrl.replace('localhost', '127.0.0.1').replace(/\/$/, '')
+  : (import.meta.env.PROD ? 'https://codetitans-t3-01.onrender.com' : 'http://127.0.0.1:8081');
 
 export function getApiBaseUrl() {
   return resolvedBaseUrl;
@@ -46,12 +50,11 @@ async function request(endpoint, options = {}) {
 
   const candidateUrls = [
     resolvedBaseUrl,
-    resolvedBaseUrl.includes(':8081') ? resolvedBaseUrl.replace(':8081', ':8000') : resolvedBaseUrl.replace(':8000', ':8081'),
+    'https://codetitans-t3-01.onrender.com',
+    '',
     'http://127.0.0.1:8081',
     'http://127.0.0.1:8000',
-    'http://localhost:8081',
-    'http://localhost:8000',
-  ];
+  ].filter(u => u !== undefined && u !== null);
   // Deduplicate
   const uniqueUrls = [...new Set(candidateUrls)];
 
@@ -85,74 +88,74 @@ async function request(endpoint, options = {}) {
   }
 
   console.warn(`[CarbonTrack API] Error connecting to ${endpoint}:`, lastError?.message);
-  throw new Error('Unable to connect to CarbonTrack server. Please verify the backend is running at http://127.0.0.1:8081.');
+  throw new Error('Unable to connect to the CarbonTrack server. Please verify the backend is running.');
 }
 
 export const api = {
-  // Auth
-  login: (email, password) => request('/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  }),
-  register: (email, fullName, password) => request('/api/auth/register', {
-    method: 'POST',
-    body: JSON.stringify({ email, full_name: fullName, password }),
-  }),
-  getMe: () => request('/api/auth/me'),
+    // Auth
+    login: (email, password) => request('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+    register: (email, fullName, password) => request('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, full_name: fullName, password }),
+    }),
+    getMe: () => request('/api/auth/me'),
 
-  // Health
-  checkHealth: () => request('/api/health'),
+    // Health
+    checkHealth: () => request('/api/health'),
 
-  // Activities / Calculations
-  getActivities: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/api/activities${query ? `?${query}` : ''}`);
-  },
-  createActivity: (activityData) => request('/api/activities', {
-    method: 'POST',
-    body: JSON.stringify(activityData),
-  }),
-  deleteActivity: (id) => request(`/api/activities/${id}`, {
-    method: 'DELETE',
-  }),
+    // Activities / Calculations
+    getActivities: (params = {}) => {
+      const query = new URLSearchParams(params).toString();
+      return request(`/api/activities${query ? `?${query}` : ''}`);
+    },
+    createActivity: (activityData) => request('/api/activities', {
+      method: 'POST',
+      body: JSON.stringify(activityData),
+    }),
+    deleteActivity: (id) => request(`/api/activities/${id}`, {
+      method: 'DELETE',
+    }),
 
-  // Server-side calculation verification (POST /api/calculate)
-  calculate: (calcData) => request('/api/calculate', {
-    method: 'POST',
-    body: JSON.stringify(calcData),
-  }),
+    // Server-side calculation verification (POST /api/calculate)
+    calculate: (calcData) => request('/api/calculate', {
+      method: 'POST',
+      body: JSON.stringify(calcData),
+    }),
 
-  // Dashboard & Analytics
-  getDashboardSummary: () => request('/api/dashboard/summary'),
-  getAnalytics: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/api/analytics${query ? `?${query}` : ''}`);
-  },
+    // Dashboard & Analytics
+    getDashboardSummary: () => request('/api/dashboard/summary'),
+    getAnalytics: (params = {}) => {
+      const query = new URLSearchParams(params).toString();
+      return request(`/api/analytics${query ? `?${query}` : ''}`);
+    },
 
-  // Reduction Targets
-  getTargets: () => request('/api/targets'),
-  saveTarget: (targetData) => request('/api/targets', {
-    method: 'POST',
-    body: JSON.stringify(targetData),
-  }),
+    // Reduction Targets
+    getTargets: () => request('/api/targets'),
+    saveTarget: (targetData) => request('/api/targets', {
+      method: 'POST',
+      body: JSON.stringify(targetData),
+    }),
 
-  // Challenges
-  getChallenges: () => request('/api/challenges'),
-  toggleChallenge: (id, completed) => request(`/api/challenges/${id}/toggle`, {
-    method: 'POST',
-    body: JSON.stringify({ completed }),
-  }),
+    // Challenges
+    getChallenges: () => request('/api/challenges'),
+    toggleChallenge: (id, completed) => request(`/api/challenges/${id}/toggle`, {
+      method: 'POST',
+      body: JSON.stringify({ completed }),
+    }),
 
-  // Leaderboard
-  getLeaderboard: () => request('/api/leaderboard'),
+    // Leaderboard
+    getLeaderboard: () => request('/api/leaderboard'),
 
-  // Settings & Reset
-  getSettings: () => request('/api/settings'),
-  saveSettings: (settingsData) => request('/api/settings', {
-    method: 'POST',
-    body: JSON.stringify(settingsData),
-  }),
-  resetData: () => request('/api/data/reset', {
-    method: 'POST',
-  }),
-};
+    // Settings & Reset
+    getSettings: () => request('/api/settings'),
+    saveSettings: (settingsData) => request('/api/settings', {
+      method: 'POST',
+      body: JSON.stringify(settingsData),
+    }),
+    resetData: () => request('/api/data/reset', {
+      method: 'POST',
+    }),
+  };

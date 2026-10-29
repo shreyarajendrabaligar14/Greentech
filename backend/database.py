@@ -5,7 +5,19 @@ import bcrypt
 from contextlib import contextmanager
 
 DB_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(DB_DIR, "carbontrack.db")
+
+# Configure database path with serverless /tmp support for Vercel
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    DB_PATH = "/tmp/carbontrack.db"
+    source_db = os.path.join(DB_DIR, "carbontrack.db")
+    if os.path.exists(source_db) and not os.path.exists(DB_PATH):
+        try:
+            import shutil
+            shutil.copy2(source_db, DB_PATH)
+        except Exception as e:
+            print(f"[Database] Notice: Initializing new SQLite db in /tmp: {e}")
+else:
+    DB_PATH = os.path.join(DB_DIR, "carbontrack.db")
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
